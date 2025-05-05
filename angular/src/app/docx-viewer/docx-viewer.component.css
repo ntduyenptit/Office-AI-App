@@ -1,0 +1,109 @@
+.card {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1rem;
+}
+
+.card-body {
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.docx-content {
+  border: 1px solid #e0e0e0;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 4px;
+  min-height: 400px;
+  max-height: 800px;
+  overflow-y: auto;
+}
+
+.docx-content :first-child {
+  margin-top: 0;
+}
+
+.docx-content p {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.docx-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+
+.docx-content table td,
+.docx-content table th {
+  border: 1px solid #dee2e6;
+  padding: 8px;
+}
+
+.docx-content img {
+  max-width: 100%;
+  height: auto;
+}
+
+.list-group-item {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.list-group-item:hover {
+  background-color: #f8f9fa;
+}
+
+.list-group-item.active {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.list-group-item i {
+  color: #2b579a;
+}
+
+.list-group-item.active i {
+  color: #ffffff;
+}
+
+.docx-container {
+  width: 100%;
+  min-height: 500px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 20px;
+  background-color: white;
+  overflow: auto;
+}
+
+/* Styles for the docx-preview rendered content */
+.docx-container .page {
+  margin: 0 auto;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  background-color: white;
+}
+
+.docx-container .page:last-child {
+  margin-bottom: 0;
+}
+
+/* Ensure proper text rendering */
+.docx-container * {
+  font-family: 'Times New Roman', Times, serif;
+  line-height: 1.5;
+}
+
+/* Style for the file list */
+.list-group-item.active {
+  background-color: #007bff;
+  border-color: #007bff;
+  color: white;
+}
+
+.list-group-item:hover:not(.active) {
+  background-color: #f8f9fa;
+}
