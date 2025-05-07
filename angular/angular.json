@@ -20,6 +20,11 @@
               "src/assets",
               "src/favicon.ico",
               {
+                "glob": "**/*",
+                "input": "src/assets/docx-templates",
+                "output": "/assets/docx-templates"
+              },
+              {
                 "glob": "abp.signalr.js",
                 "input": "node_modules/abp-web-resources/Abp/Framework/scripts/libs",
                 "output": "/assets/abp"
@@ -101,7 +106,8 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "buildTarget": "Office_Project:build"
+            "buildTarget": "Office_Project:build",
+            "proxyConfig": "proxy.conf.json"
           },
           "configurations": {
             "production": {

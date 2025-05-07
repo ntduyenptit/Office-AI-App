@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { NgModule, ModuleWithProviders } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { NgxPaginationModule } from 'ngx-pagination';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AppSessionService } from './session/app-session.service';
 import { AppUrlService } from './nav/app-url.service';
 import { AppAuthService } from './auth/app-auth.service';
@@ -33,6 +33,7 @@ import { ProgressBarModule } from 'primeng/progressbar';
         RouterModule,
         NgxPaginationModule,
         FormsModule,
+        ReactiveFormsModule,
         ModalModule,
         BsDropdownModule,
         CollapseModule,
@@ -60,6 +61,7 @@ import { ProgressBarModule } from 'primeng/progressbar';
         BusyDirective,
         EqualValidator,
         FormsModule,
+        ReactiveFormsModule,
         NgxPaginationModule,
         ModalModule,
         BsDropdownModule,

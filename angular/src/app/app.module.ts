@@ -23,6 +23,8 @@ import { SidebarLogoComponent } from './layout/sidebar-logo.component';
 import { SidebarUserPanelComponent } from './layout/sidebar-user-panel.component';
 import { SidebarMenuComponent } from './layout/sidebar-menu.component';
 import { DocxViewerComponent } from './docx-viewer/docx-viewer.component';
+import { TemplateService } from './services/template.service';
+import { TemplateFilesService } from './services/template-files.service';
 
 @NgModule({
     declarations: [
@@ -53,6 +55,10 @@ import { DocxViewerComponent } from './docx-viewer/docx-viewer.component';
         NgxPaginationModule,
         SharedModule
     ],
-    providers: []
+    providers: [
+        TemplateService,
+        TemplateFilesService
+    ],
+    bootstrap: [AppComponent]
 })
 export class AppModule { }

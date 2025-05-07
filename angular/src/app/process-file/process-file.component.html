@@ -1,0 +1,47 @@
+<div class="process-file-container">
+  <!-- File Upload Section -->
+  <div class="upload-section">
+    <h3>Upload Document</h3>
+    <div class="upload-area" (click)="fileInput.click()">
+      <input #fileInput type="file" 
+             accept=".docx" 
+             (change)="onFileSelect($event)" 
+             style="display: none">
+      <i class="fas fa-cloud-upload-alt"></i>
+      <p>Click to upload a .docx file</p>
+      <p *ngIf="selectedFile" class="selected-file">
+        Selected: {{ selectedFile.name }}
+      </p>
+    </div>
+  </div>
+
+  <!-- Document Viewer Section -->
+  <div class="viewer-section">
+    <h3>Document Content</h3>
+    <div #documentContainer class="document-container"></div>
+  </div>
+
+  <!-- Extracted Content Section -->
+  <div class="extracted-content-section" *ngIf="extractedContent.length > 0">
+    <h3>Extracted Content</h3>
+    <div class="content-list">
+      <div *ngFor="let item of extractedContent" class="content-item">
+        <span class="item-id">{{ item.id }}</span>
+        <span class="item-content">{{ item.content }}</span>
+      </div>
+    </div>
+    <button class="btn btn-primary" (click)="downloadExcel()">
+      <i class="fas fa-file-excel"></i> Export to Excel
+    </button>
+  </div>
+
+  <!-- Loading Indicator -->
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="error" class="alert alert-danger">
+    {{ error }}
+  </div>
+</div> 
