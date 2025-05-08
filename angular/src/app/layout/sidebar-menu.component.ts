@@ -19,7 +19,7 @@ export class SidebarMenuComponent extends AppComponentBase implements OnInit {
     menuItemsMap: { [key: number]: MenuItem } = {};
     activatedMenuItems: MenuItem[] = [];
     routerEvents: BehaviorSubject<RouterEvent> = new BehaviorSubject(undefined);
-    homeRoute = '/app/about';
+    homeRoute = '/app/home';
 
     constructor(injector: Injector, private router: Router) {
         super(injector);
@@ -41,25 +41,22 @@ export class SidebarMenuComponent extends AppComponentBase implements OnInit {
 
     getMenuItems(): MenuItem[] {
         return [
-            new MenuItem(this.l('About'), '/app/about', 'fas fa-info-circle'),
-            new MenuItem(this.l('HomePage'), '/app/home', 'fas fa-home'),
+            new MenuItem(this.l('Tạo văn bản'), '/app/create-document', 'fas fa-info-circle'),
+            new MenuItem(this.l('Kiểm tra văn bản'), '/app/home', 'fas fa-home'),
             new MenuItem(
                 this.l('Roles'),
                 '/app/roles',
-                'fas fa-theater-masks',
-                'Pages.Roles'
+                'fas fa-theater-masks'
             ),
             new MenuItem(
-                this.l('Tenants'),
-                '/app/tenants',
-                'fas fa-building',
-                'Pages.Tenants'
+                this.l('Trích xuất văn bản'),
+                '/app/process-document',
+                'fas fa-building'
             ),
             new MenuItem(
                 this.l('Users'),
                 '/app/users',
-                'fas fa-users',
-                'Pages.Users'
+                'fas fa-users'
             )
             // new MenuItem(this.l('MultiLevelMenu'), '', 'fas fa-circle', '', [
             //     new MenuItem('ASP.NET Boilerplate', '', 'fas fa-dot-circle', '', [

@@ -4,13 +4,16 @@
     <h3>Upload Document</h3>
     <div class="upload-area" (click)="fileInput.click()">
       <input #fileInput type="file" 
-             accept=".docx" 
+             accept=".docx,.pdf" 
              (change)="onFileSelect($event)" 
              style="display: none">
       <i class="fas fa-cloud-upload-alt"></i>
-      <p>Click to upload a .docx file</p>
+      <p>Click to upload a .docx or .pdf file</p>
       <p *ngIf="selectedFile" class="selected-file">
         Selected: {{ selectedFile.name }}
+        <span class="file-type-badge" [class.pdf]="fileType === 'pdf'" [class.docx]="fileType === 'docx'">
+          {{ fileType?.toUpperCase() }}
+        </span>
       </p>
     </div>
   </div>
@@ -18,7 +21,7 @@
   <!-- Document Viewer Section -->
   <div class="viewer-section">
     <h3>Document Content</h3>
-    <div #documentContainer class="document-container"></div>
+    <div #documentContainer class="document-container" [class.pdf-viewer]="fileType === 'pdf'"></div>
   </div>
 
   <!-- Extracted Content Section -->
@@ -27,6 +30,7 @@
     <div class="content-list">
       <div *ngFor="let item of extractedContent" class="content-item">
         <span class="item-id">{{ item.id }}</span>
+        <span class="item-page">Page {{ item.page }}</span>
         <span class="item-content">{{ item.content }}</span>
       </div>
     </div>
@@ -42,6 +46,6 @@
 
   <!-- Error Message -->
   <div *ngIf="error" class="alert alert-danger">
-    {{ error }}
+    <i class="fas fa-exclamation-circle"></i> {{ error }}
   </div>
 </div> 

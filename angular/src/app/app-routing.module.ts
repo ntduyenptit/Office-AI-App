@@ -9,7 +9,7 @@ const routes: Routes = [
         path: '',
         component: AppComponent,
         children: [
-            { path: '', redirectTo: '/docx-viewer', pathMatch: 'full' },
+            // { path: '', redirectTo: '/docx-viewer', pathMatch: 'full' },
             { path: 'docx-viewer', component: DocxViewerComponent },
             {
                 path: 'home',
@@ -17,26 +17,26 @@ const routes: Routes = [
                 canActivate: [AppRouteGuard]
             },
             {
-                path: 'about',
+                path: 'create-document',
                 loadChildren: () => import('./docx-viewer/docx-viewer.module').then((m) => m.DocxViewerModule),
                 canActivate: [AppRouteGuard]
             },
             {
                 path: 'users',
                 loadChildren: () => import('./users/users.module').then((m) => m.UsersModule),
-                data: { permission: 'Pages.Users' },
+                // data: { permission: 'Pages.Users' },
                 canActivate: [AppRouteGuard]
             },
             {
                 path: 'roles',
                 loadChildren: () => import('./roles/roles.module').then((m) => m.RolesModule),
-                data: { permission: 'Pages.Roles' },
+                // data: { permission: 'Pages.Roles' },
                 canActivate: [AppRouteGuard]
             },
             {
-                path: 'tenants',
-                loadChildren: () => import('./tenants/tenants.module').then((m) => m.TenantsModule),
-                data: { permission: 'Pages.Tenants' },
+                path: 'process-document',
+                loadChildren: () => import('./process-file/process-file.module').then((m) => m.ProcessFileModule),
+                // data: { permission: 'Pages.Tenants' },
                 canActivate: [AppRouteGuard]
             },
             {

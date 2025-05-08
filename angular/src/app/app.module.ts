@@ -22,7 +22,6 @@ import { SidebarComponent } from './layout/sidebar.component';
 import { SidebarLogoComponent } from './layout/sidebar-logo.component';
 import { SidebarUserPanelComponent } from './layout/sidebar-user-panel.component';
 import { SidebarMenuComponent } from './layout/sidebar-menu.component';
-import { DocxViewerComponent } from './docx-viewer/docx-viewer.component';
 import { TemplateService } from './services/template.service';
 import { TemplateFilesService } from './services/template-files.service';
 

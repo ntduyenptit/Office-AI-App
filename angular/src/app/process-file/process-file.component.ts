@@ -4,6 +4,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { renderAsync } from 'docx-preview';
 import * as XLSX from 'xlsx';
 import { environment } from '../../environments/environment';
+import * as pdfjsLib from 'pdfjs-dist';
 
 @Component({
   selector: 'app-process-file',
@@ -19,11 +20,15 @@ export class ProcessFileComponent implements OnInit {
   error: string | null = null;
   extractedContent: any[] = [];
   currentArrayBuffer: ArrayBuffer | null = null;
+  fileType: 'pdf' | 'docx' | null = null;
 
   constructor(
     private http: HttpClient,
     private sanitizer: DomSanitizer
-  ) {}
+  ) {
+    // Set up PDF.js worker
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'assets/pdf.worker.js';
+  }
 
   ngOnInit() {}
 
@@ -33,12 +38,13 @@ export class ProcessFileComponent implements OnInit {
       const file = input.files[0];
       
       // Validate file type
-      if (!file.name.endsWith('.docx')) {
-        this.error = 'Please upload a .docx file';
+      if (!file.name.endsWith('.docx') && !file.name.endsWith('.pdf')) {
+        this.error = 'Please upload a .docx or .pdf file';
         return;
       }
 
       this.selectedFile = file;
+      this.fileType = file.name.endsWith('.pdf') ? 'pdf' : 'docx';
       this.isLoading = true;
       this.error = null;
 
@@ -52,7 +58,11 @@ export class ProcessFileComponent implements OnInit {
           }
 
           this.currentArrayBuffer = arrayBuffer;
-          this.loadDocxContent(arrayBuffer);
+          if (this.fileType === 'pdf') {
+            this.loadPdfContent(arrayBuffer);
+          } else {
+            this.loadDocxContent(arrayBuffer);
+          }
         } catch (error) {
           console.error('Error processing file:', error);
           this.error = 'Failed to process file';
@@ -67,6 +77,43 @@ export class ProcessFileComponent implements OnInit {
       };
 
       reader.readAsArrayBuffer(file);
+    }
+  }
+
+  private async loadPdfContent(arrayBuffer: ArrayBuffer) {
+    try {
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const numPages = pdf.numPages;
+      const extractedText: string[] = [];
+
+      // Extract text from each page
+      for (let i = 1; i <= numPages; i++) {
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items
+          .map((item: any) => item.str)
+          .join(' ')
+          .trim();
+        extractedText.push(pageText);
+      }
+
+      // Display PDF content
+      this.documentContainer.nativeElement.innerHTML = extractedText
+        .map((text, index) => `<div class="pdf-page"><h4>Page ${index + 1}</h4><p>${text}</p></div>`)
+        .join('');
+
+      // Extract content for Excel export
+      this.extractedContent = extractedText.map((text, index) => ({
+        id: index + 1,
+        content: text,
+        page: index + 1
+      }));
+
+      this.isLoading = false;
+    } catch (error) {
+      console.error('Error rendering PDF:', error);
+      this.error = 'Failed to render PDF document';
+      this.isLoading = false;
     }
   }
 
@@ -100,13 +147,12 @@ export class ProcessFileComponent implements OnInit {
 
     const content = this.documentContainer.nativeElement.innerHTML;
     // Extract content based on your requirements
-    // This is a sample extraction - modify according to your needs
     const paragraphs = Array.from(this.documentContainer.nativeElement.querySelectorAll('p')) as HTMLElement[];
     
     this.extractedContent = paragraphs.map((p, index) => ({
       id: index + 1,
       content: p.textContent?.trim() || '',
-      // Add more fields as needed
+      page: Math.floor(index / 10) + 1 // Approximate page number
     }));
   }
 
