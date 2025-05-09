@@ -1,131 +1,158 @@
 import { Injectable } from '@angular/core';
-import { TemplateContent } from '../models/template-content.model';
+import { BehaviorSubject, Observable } from 'rxjs';
+
+export interface TemplateContent {
+  id: string;
+  label: string;
+  value: string;
+  description: string;
+  isMultiple?: boolean;
+  items?: string[];
+  placeholder: string;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class TemplateService {
-  private templateContents: TemplateContent[] = [
+  private templateContents = new BehaviorSubject<TemplateContent[]>([
     {
-      id: '1',
-      placeholder: '(1)',
-      label: 'Báo cáo ABC',
-      value: '',
-      description: 'Tên báo cáo'
+      id: 'report',
+      label: 'Báo cáo',
+      value: 'Tên báo cáo',
+      description: 'Tên báo cáo',
+      placeholder: '(1)'
     },
     {
-      id: '2',
-      placeholder: '(2)',
+      id: 'basis',
       label: 'Căn cứ',
       value: '',
-      description: 'Căn cứ báo cáo'
+      description: 'Căn cứ pháp lý',
+      isMultiple: true,
+      items: [],
+      placeholder: '(2)'
     },
     {
-      id: '3',
-      placeholder: '(3)',
-      label: 'Nội dung báo cáo',
-      value: '',
-      description: 'Nội dung bản báo cáo'
+      id: 'content',
+      label: 'Nội dung',
+      value: 'Nội dung báo  cáo',
+      description: 'Nội dung chính',
+      placeholder: '(3)'
     }
-    // {
-    //   id: '4',
-    //   placeholder: '(4)',
-    //   label: 'Người kính gửi',
-    //   value: 'Giám đốc Trung tâm',
-    //   description: 'Người nhận báo cáo'
-    // },
-    // {
-    //   id: '5',
-    //   placeholder: '(5)',
-    //   label: 'Căn cứ',
-    //   value: 'Căn cứ vào các văn bản hướng dẫn của cấp trên',
-    //   description: 'Căn cứ pháp lý'
-    // },
-    // {
-    //   id: '6',
-    //   placeholder: '(6)',
-    //   label: 'Nội dung báo cáo',
-    //   value: 'Nội dung báo cáo tổng kết năm 2024 về các hoạt động của Trung tâm như sau.',
-    //   description: 'Nội dung chính của báo cáo'
-    // },
-    // {
-    //   id: '7',
-    //   placeholder: '(7)',
-    //   label: 'Nơi nhận 1',
-    //   value: 'Như trên',
-    //   description: 'Nơi nhận thứ nhất'
-    // },
-    // {
-    //   id: '8',
-    //   placeholder: '(8)',
-    //   label: 'Nơi nhận 2',
-    //   value: 'A Đức - P.GĐTT',
-    //   description: 'Nơi nhận thứ hai'
-    // },
-    // {
-    //   id: '9',
-    //   placeholder: '(9)',
-    //   label: 'Nơi nhận 3',
-    //   value: 'P.NCSP',
-    //   description: 'Nơi nhận thứ ba'
-    // },
-    // {
-    //   id: '10',
-    //   placeholder: '(10)',
-    //   label: 'Tên người ký',
-    //   value: 'Lê Xuân Huy',
-    //   description: 'Tên người ký báo cáo'
-    // }
-  ];
+  ]);
 
-  getTemplateContents(): TemplateContent[] {
-    return this.templateContents;
+  // Expose the BehaviorSubject as an Observable
+  templateContents$ = this.templateContents.asObservable();
+
+  getTemplateContents() {
+    console.log('Step 1: Getting template contents');
+    const contents = this.templateContents.value;
+    console.log('Current contents:', contents);
+    return contents;
   }
 
-  updateTemplateContent(id: string, value: string): void {
-    const content = this.templateContents.find(c => c.id === id);
-    if (content) {
-      content.value = value;
+  addBasisItem() {
+    console.log('Step 1: Adding new căn cứ item');
+    const contents = this.templateContents.value;
+    const basisContent = contents.find(c => c.id === 'basis');
+    if (basisContent && basisContent.items) {
+      console.log('Step 2: Found basis content, current items:', basisContent.items);
+      basisContent.items.push('');
+      console.log('Step 3: Added new item, updated items:', basisContent.items);
+      this.updateBasisValue(basisContent);
+      console.log('Step 4: Updated basis value:', basisContent.value);
+      this.templateContents.next([...contents]);
+      console.log('Step 5: Emitted new contents');
     }
   }
 
-  // Get all replacements
-  getReplacements(): { [key: string]: string } {
-    return this.templateContents.reduce((acc, content) => {
-      acc[content.placeholder] = content.value || content.label;
-      return acc;
-    }, {} as { [key: string]: string });
+  removeBasisItem(index: number) {
+    console.log('Step 1: Removing căn cứ item at index:', index);
+    const contents = this.templateContents.value;
+    const basisContent = contents.find(c => c.id === 'basis');
+    if (basisContent && basisContent.items && basisContent.items.length > 1) {
+      console.log('Step 2: Found basis content, current items:', basisContent.items);
+      basisContent.items.splice(index, 1);
+      console.log('Step 3: Removed item, updated items:', basisContent.items);
+      this.updateBasisValue(basisContent);
+      console.log('Step 4: Updated basis value:', basisContent.value);
+      this.templateContents.next([...contents]);
+      console.log('Step 5: Emitted new contents');
+    }
   }
 
-  // Process template content while preserving formatting
-  processTemplateContent(content: string): string {
-    const replacements = this.getReplacements();
-    let processedContent = content;
-
-    // Create a temporary div to parse the HTML
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = content;
-
-    // Process each text node while preserving formatting
-    const processNode = (node: Node) => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        let text = node.textContent || '';
-        for (const [key, value] of Object.entries(replacements)) {
-          if (text.includes(key)) {
-            text = text.replace(new RegExp(this.escapeRegExp(key), 'g'), value);
-          }
+  private updateBasisValue(basisContent: TemplateContent) {
+    console.log('Step 1: Updating basis value');
+    if (basisContent.items) {
+      const nonEmptyItems = basisContent.items.filter(item => item.trim());
+      console.log('Step 2: Non-empty items:', nonEmptyItems);
+      if (nonEmptyItems.length > 0) {
+        // First item goes at placeholder (2)
+        let value = nonEmptyItems[0];
+        // Additional items go on new lines
+        if (nonEmptyItems.length > 1) {
+          value += '\n' + nonEmptyItems.slice(1).map((item, idx) => `${idx + 2}. ${item}`).join('\n');
         }
-        node.textContent = text;
-      } else if (node.nodeType === Node.ELEMENT_NODE) {
-        // Process child nodes
-        Array.from(node.childNodes).forEach(processNode);
+        basisContent.value = value;
+      } else {
+        basisContent.value = '';
       }
-    };
+      console.log('Step 3: New basis value:', basisContent.value);
+    }
+  }
 
-    // Process all nodes
-    Array.from(tempDiv.childNodes).forEach(processNode);
+  updateTemplateContent(id: string, value: string, index?: number) {
+    console.log('Step 1: Updating template content');
+    console.log('Content ID:', id);
+    console.log('New value:', value);
+    console.log('Item index:', index);
 
-    return tempDiv.innerHTML;
+    const contents = this.templateContents.value;
+    const content = contents.find(c => c.id === id);
+    if (content) {
+      if (content.isMultiple && content.items && index !== undefined) {
+        console.log('Step 2: Updating multiple item content');
+        console.log('Current items:', content.items);
+        content.items[index] = value;
+        console.log('Updated items:', content.items);
+        this.updateBasisValue(content);
+        console.log('Step 3: Updated basis value:', content.value);
+      } else {
+        console.log('Step 2: Updating single item content');
+        content.value = value;
+        console.log('New value:', content.value);
+      }
+      this.templateContents.next([...contents]);
+      console.log('Step 3: Emitted new contents');
+    }
+  }
+
+  processTemplateContent(html: string): string {
+    console.log('Step 1: Processing template content');
+    let processedHtml = html;
+    this.templateContents.value.forEach(content => {
+      console.log('Processing content:', content.id);
+      if (content.isMultiple && content.items) {
+        console.log('Step 2: Processing multiple items');
+        const nonEmptyItems = content.items.filter(item => item.trim());
+        console.log('Non-empty items:', nonEmptyItems);
+        if (nonEmptyItems.length > 0) {
+          const value = nonEmptyItems.length > 1 
+            ? nonEmptyItems[0] + '\n' + nonEmptyItems.slice(1).map((item, idx) => `${idx + 2}. ${item}`).join('\n')
+            : nonEmptyItems[0];
+          console.log('Generated value:', value);
+          processedHtml = processedHtml.replace(new RegExp(this.escapeRegExp(content.placeholder), 'g'), value);
+        } else {
+          console.log('No non-empty items, replacing with empty string');
+          processedHtml = processedHtml.replace(new RegExp(this.escapeRegExp(content.placeholder), 'g'), '');
+        }
+      } else {
+        console.log('Step 2: Processing single item');
+        processedHtml = processedHtml.replace(new RegExp(this.escapeRegExp(content.placeholder), 'g'), content.value);
+      }
+    });
+    console.log('Step 3: Final processed HTML:', processedHtml);
+    return processedHtml;
   }
 
   // Helper function to escape special characters in regex
