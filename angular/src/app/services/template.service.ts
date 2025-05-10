@@ -86,17 +86,9 @@ export class TemplateService {
     if (basisContent.items) {
       const nonEmptyItems = basisContent.items.filter(item => item.trim());
       console.log('Step 2: Non-empty items:', nonEmptyItems);
-      if (nonEmptyItems.length > 0) {
-        // First item goes at placeholder (2)
-        let value = nonEmptyItems[0];
-        // Additional items go on new lines
-        if (nonEmptyItems.length > 1) {
-          value += '\n' + nonEmptyItems.slice(1).map((item, idx) => `${idx + 2}. ${item}`).join('\n');
-        }
-        basisContent.value = value;
-      } else {
-        basisContent.value = '';
-      }
+      basisContent.value = nonEmptyItems.length > 0 
+        ? nonEmptyItems.map((item, idx) => `${idx + 1}. ${item}`).join('\n')
+        : '';
       console.log('Step 3: New basis value:', basisContent.value);
     }
   }
@@ -137,9 +129,7 @@ export class TemplateService {
         const nonEmptyItems = content.items.filter(item => item.trim());
         console.log('Non-empty items:', nonEmptyItems);
         if (nonEmptyItems.length > 0) {
-          const value = nonEmptyItems.length > 1 
-            ? nonEmptyItems[0] + '\n' + nonEmptyItems.slice(1).map((item, idx) => `${idx + 2}. ${item}`).join('\n')
-            : nonEmptyItems[0];
+          const value = nonEmptyItems.map((item, idx) => `${idx + 1}. ${item}`).join('\n');
           console.log('Generated value:', value);
           processedHtml = processedHtml.replace(new RegExp(this.escapeRegExp(content.placeholder), 'g'), value);
         } else {

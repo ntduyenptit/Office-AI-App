@@ -37,7 +37,7 @@ import { TemplateFilesService } from './services/template-files.service';
         SidebarComponent,
         SidebarLogoComponent,
         SidebarUserPanelComponent,
-        SidebarMenuComponent,
+        SidebarMenuComponent
     ],
     imports: [
         AppRoutingModule,

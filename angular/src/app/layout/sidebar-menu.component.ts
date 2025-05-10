@@ -42,12 +42,7 @@ export class SidebarMenuComponent extends AppComponentBase implements OnInit {
     getMenuItems(): MenuItem[] {
         return [
             new MenuItem(this.l('Tạo văn bản'), '/app/create-document', 'fas fa-info-circle'),
-            new MenuItem(this.l('Kiểm tra văn bản'), '/app/home', 'fas fa-home'),
-            new MenuItem(
-                this.l('Roles'),
-                '/app/roles',
-                'fas fa-theater-masks'
-            ),
+            new MenuItem(this.l('Kiểm tra văn bản'), '/app/spell-check', 'fas fa-home'),
             new MenuItem(
                 this.l('Trích xuất văn bản'),
                 '/app/process-document',
@@ -57,7 +52,12 @@ export class SidebarMenuComponent extends AppComponentBase implements OnInit {
                 this.l('Users'),
                 '/app/users',
                 'fas fa-users'
-            )
+            ),
+            new MenuItem(
+                this.l('Roles'),
+                '/app/roles',
+                'fas fa-theater-masks'
+            ),
             // new MenuItem(this.l('MultiLevelMenu'), '', 'fas fa-circle', '', [
             //     new MenuItem('ASP.NET Boilerplate', '', 'fas fa-dot-circle', '', [
             //         new MenuItem(

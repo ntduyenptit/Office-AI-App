@@ -1,19 +1,19 @@
-import { Component, OnInit, ElementRef, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { renderAsync } from 'docx-preview';
-import { TemplateService } from '../services/template.service';
-import { TemplateContent } from '../models/template-content.model';
+import { TemplateService, TemplateContent } from '../services/template.service';
 import { environment } from '../../environments/environment';
 import { TemplateFilesService } from '../services/template-files.service';
 import { Document, Packer, Paragraph, TextRun } from 'docx';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-docx-viewer',
   templateUrl: './docx-viewer.component.html',
   styleUrls: ['./docx-viewer.component.css']
 })
-export class DocxViewerComponent implements OnInit {
+export class DocxViewerComponent implements OnInit, OnDestroy {
   @ViewChild('documentContainer') documentContainer!: ElementRef;
   
   files: { name: string; url: string }[] = [];
@@ -25,6 +25,7 @@ export class DocxViewerComponent implements OnInit {
   originalContent: string | null = null;
   currentArrayBuffer: ArrayBuffer | null = null;
   templateContents: TemplateContent[] = [];
+  private templateSubscription: Subscription | null = null;
 
   constructor(
     private http: HttpClient,
@@ -37,6 +38,73 @@ export class DocxViewerComponent implements OnInit {
   ngOnInit() {
     this.loadFiles();
     this.templateContents = this.templateService.getTemplateContents();
+    
+    // Subscribe to template content changes
+    this.templateSubscription = this.templateService.templateContents$.subscribe(() => {
+      if (this.isTemplateMode && this.originalContent) {
+        this.processTemplateContent();
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.templateSubscription) {
+      this.templateSubscription.unsubscribe();
+    }
+  }
+
+  onContentChange(content: TemplateContent, index?: number) {
+    this.templateService.updateTemplateContent(content.id, content.value, index);
+    // Force immediate update
+    if (this.isTemplateMode && this.originalContent) {
+      setTimeout(() => {
+        this.processTemplateContent();
+        this.cdr.detectChanges();
+      }, 0);
+    }
+  }
+
+  addBasisItem() {
+    this.templateService.addBasisItem();
+    // Force immediate update
+    if (this.isTemplateMode && this.originalContent) {
+      setTimeout(() => {
+        this.processTemplateContent();
+        this.cdr.detectChanges();
+      }, 0);
+    }
+  }
+
+  removeBasisItem(index: number) {
+    this.templateService.removeBasisItem(index);
+    // Force immediate update
+    if (this.isTemplateMode && this.originalContent) {
+      setTimeout(() => {
+        this.processTemplateContent();
+        this.cdr.detectChanges();
+      }, 0);
+    }
+  }
+
+  private processTemplateContent() {
+    if (this.originalContent) {
+      const processedContent = this.templateService.processTemplateContent(this.originalContent);
+      this.documentContainer.nativeElement.innerHTML = processedContent;
+    }
+  }
+
+  toggleTemplateMode() {
+    this.isTemplateMode = !this.isTemplateMode;
+    if (this.isTemplateMode) {
+      // Store original content when switching to template mode
+      this.originalContent = this.documentContainer.nativeElement.innerHTML;
+      this.processTemplateContent();
+    } else {
+      // Restore original content when switching back
+      if (this.originalContent) {
+        this.documentContainer.nativeElement.innerHTML = this.originalContent;
+      }
+    }
   }
 
   loadFiles() {
@@ -135,34 +203,6 @@ export class DocxViewerComponent implements OnInit {
         this.selectedFile = null;
         this.docxContent = null;
       }
-    }
-  }
-
-  toggleTemplateMode() {
-    this.isTemplateMode = !this.isTemplateMode;
-    if (this.isTemplateMode) {
-      // Store original content when switching to template mode
-      this.originalContent = this.documentContainer.nativeElement.innerHTML;
-      this.processTemplateContent();
-    } else {
-      // Restore original content when switching back
-      if (this.originalContent) {
-        this.documentContainer.nativeElement.innerHTML = this.originalContent;
-      }
-    }
-  }
-
-  onContentChange(content: TemplateContent) {
-    this.templateService.updateTemplateContent(content.id, content.value);
-    if (this.isTemplateMode) {
-      this.processTemplateContent();
-    }
-  }
-
-  private processTemplateContent() {
-    if (this.originalContent) {
-      const processedContent = this.templateService.processTemplateContent(this.originalContent);
-      this.documentContainer.nativeElement.innerHTML = processedContent;
     }
   }
 
@@ -271,5 +311,30 @@ export class DocxViewerComponent implements OnInit {
           this.isLoading = false;
         }
       });
+  }
+
+  async generateContentWithAI(prompt: string) {
+    if (!this.selectedFile) {
+      this.error = 'Please select a template first';
+      return;
+    }
+
+    try {
+      this.isLoading = true;
+      const response = await this.http.post(`${environment.apiUrl}/api/openai/generate`, { prompt }).toPromise();
+      
+      if (response && typeof response === 'object' && 'content' in response) {
+        const generatedContent = (response as any).content;
+        this.templateService.updateTemplateContent('generated', generatedContent);
+        if (this.isTemplateMode) {
+          this.processTemplateContent();
+        }
+      }
+    } catch (error) {
+      console.error('Error generating content:', error);
+      this.error = 'Failed to generate content';
+    } finally {
+      this.isLoading = false;
+    }
   }
 }

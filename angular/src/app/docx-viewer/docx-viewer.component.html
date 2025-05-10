@@ -1,7 +1,7 @@
 <div class="docx-viewer-container">
   <!-- File List Section -->
   <div class="file-list-section">
-    <h3>Template Files</h3>
+    <h3>Văn bản mẫu</h3>
     <div class="file-list">
       <div *ngFor="let file of files" 
            class="file-item" 
@@ -21,7 +21,7 @@
         <button *ngIf="selectedFile" 
                 class="btn btn-primary" 
                 (click)="toggleTemplateMode()">
-          {{ isTemplateMode ? 'View Mode' : 'Template Mode' }}
+          {{ isTemplateMode ? 'Văn bản mẫu' : 'Tạo nội dung' }}
         </button>
         <button *ngIf="selectedFile && isTemplateMode" 
                 class="btn btn-success" 
@@ -48,16 +48,45 @@
 
   <!-- Template Content Editor -->
   <div *ngIf="isTemplateMode && selectedFile" class="template-editor-section">
-    <h3>Template Content</h3>
+    <h3>Tạo nội dung tự động</h3>
     <div class="template-content">
       <div *ngFor="let content of templateContents" class="template-item">
         <label [for]="'content-' + content.id">{{ content.label }}</label>
-        <input type="text" 
-               [id]="'content-' + content.id"
-               [(ngModel)]="content.value"
-               (ngModelChange)="onContentChange(content)"
-               [placeholder]="content.description"
-               class="form-control">
+        
+        <!-- Multiple items for căn cứ -->
+        <ng-container *ngIf="content.isMultiple && content.items">
+          <div *ngFor="let item of content.items; let i = index" class="multiple-item">
+            <input type="text" 
+                   [id]="'content-' + content.id + '-' + i"
+                   [(ngModel)]="content.items[i]"
+                   (ngModelChange)="onContentChange(content, i)"
+                   [placeholder]="content.description"
+                   class="form-control">
+            <button *ngIf="content.items.length > 1" 
+                    class="btn btn-remove" 
+                    (click)="removeBasisItem(i)">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <button class="btn btn-add" (click)="addBasisItem()">
+            <i class="fas fa-plus"></i> Thêm căn cứ
+          </button>
+        </ng-container>
+
+        <!-- Single item for other fields -->
+        <ng-container *ngIf="!content.isMultiple">
+          <input type="text" 
+                 [id]="'content-' + content.id"
+                 [(ngModel)]="content.value"
+                 (ngModelChange)="onContentChange(content)"
+                 [placeholder]="content.description"
+                 class="form-control">
+          <button class="btn btn-ai" 
+                  (click)="generateContentWithAI('Generate content for ' + content.description)"
+                  [disabled]="isLoading">
+              {{ isLoading ? 'Generating...' : 'Generate with AI' }}
+          </button>
+        </ng-container>
       </div>
     </div>
   </div>

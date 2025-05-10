@@ -21,10 +21,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using System.Net.Http;
+using System.Text;
 
 namespace Office_Project.Users;
 
-[AbpAuthorize(PermissionNames.Pages_Users)]
+//[AbpAuthorize(PermissionNames.Pages_Users)]
 public class UserAppService : AsyncCrudAppService<User, UserDto, long, PagedUserResultRequestDto, CreateUserDto, UserDto>, IUserAppService
 {
     private readonly UserManager _userManager;
@@ -121,6 +124,34 @@ public class UserAppService : AsyncCrudAppService<User, UserDto, long, PagedUser
     {
         var roles = await _roleRepository.GetAllListAsync();
         return new ListResultDto<RoleDto>(ObjectMapper.Map<List<RoleDto>>(roles));
+    }
+
+    public static async Task<string> GenerateContent(string prompt)
+    {
+        string apiKey = "ấdasdasdasd";
+        using (var client = new HttpClient())
+        {
+            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
+
+            var requestBody = new
+            {
+                model = "gpt-4",  // hoặc "gpt-3.5-turbo"
+                messages = new[]
+                {
+                    new { role = "user", content = prompt }
+                },
+                temperature = 0.7
+            };
+
+            var json = JsonConvert.SerializeObject(requestBody);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await client.PostAsync("https://api.openai.com/v1/chat/completions", content);
+            var responseString = await response.Content.ReadAsStringAsync();
+
+            dynamic jsonResponse = JsonConvert.DeserializeObject(responseString);
+            return jsonResponse.choices[0].message.content.ToString();
+        }
     }
 
     public async Task ChangeLanguage(ChangeUserLanguageDto input)

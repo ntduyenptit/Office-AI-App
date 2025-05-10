@@ -43,6 +43,11 @@ const routes: Routes = [
                 path: 'update-password',
                 loadChildren: () => import('./users/users.module').then((m) => m.UsersModule),
                 canActivate: [AppRouteGuard]
+            },
+            {
+                path: 'spell-check',
+                loadChildren: () => import('./spell-check/spell-check.module').then((m) => m.SpellCheckModule),
+                canActivate: [AppRouteGuard]
             }
         ]
     }
